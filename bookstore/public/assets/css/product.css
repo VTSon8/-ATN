@@ -1,0 +1,22 @@
+
+.product-submit {
+	height: 100%;
+}
+
+.form-search {
+	display: flex;
+	align-items: center;
+}
+
+.product-search {
+	padding: 4px 0;
+}
+
+.form-search > button {
+	margin-left: 6px;
+	padding: 7px 12px;
+	border-radius: 5px;
+	color: #fff;
+	background: #3C8DBC;
+	border: none;
+}
