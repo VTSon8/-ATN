@@ -25,16 +25,16 @@
                                     alt=" 1000 Mindmap English words - 1000 từ vựng tiếng Anh bằng sơ đồ tư duy "/>
                             </a>
                             <div class="button-add d-none d-md-flex">
-                                <button type="button" class="btnQuickView quick-view"
-                                        data-handle="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                        data-tooltip="Xem nhanh"><i class="fal fa-search-plus"
-                                                                    aria-hidden="true"></i></button>
+{{--                                <button type="button" class="btnQuickView quick-view"--}}
+{{--                                        data-handle="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"--}}
+{{--                                        data-tooltip="Xem nhanh"><i class="fal fa-search-plus"--}}
+{{--                                                                    aria-hidden="true"></i></button>--}}
                                 <button title="Thêm vào giỏ" class="action "
                                         onclick="add_to_cart('1120809907');"
                                         data-tooltip="Thêm vào giỏ"><i class="fal fa-cart-plus"></i>
                                 </button>
-                                <a href="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                   data-tooltip="Chi tiết"><i class="fal fa-eye"></i></a>
+{{--                                <a href="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"--}}
+{{--                                   data-tooltip="Chi tiết"><i class="fal fa-eye"></i></a>--}}
                             </div>
                         </div>
                         <div class="product-detail">

@@ -5,7 +5,11 @@ namespace App\Repositories\Product;
 interface ProductRepositoryInterface
 {
     public function getAllProduct(string $key_word);
+
     public function getfeaturedBooks();
+
+    public function search(array $params);
+
     public function getsellingBooks();
 
     public function getProductByCondition($key_word, array $sortBy);
@@ -14,7 +18,6 @@ interface ProductRepositoryInterface
 
     public function getProductById($id);
 
-//    public function update(array $params);
     public function updateProduct($id, array $params);
 
     public function deleteProduct($id);
@@ -36,6 +39,7 @@ interface ProductRepositoryInterface
     public function getPromotionalProducts();
 
     public function getProductByCategory($slug);
+
     public function getAuthorAll();
 
     public function getProductByIdOnlyTrashed($slug);

@@ -55,7 +55,6 @@ class BannerController extends Controller
     public function store(BannerRequest $request)
     {
         try {
-            DB::beginTransaction();
             $banner = $request->validated();
             $fileName = $this->uploadImage->handleUploadedImage($banner['thumb']);
             if ($fileName) {
@@ -63,9 +62,7 @@ class BannerController extends Controller
             }
             $banner['created_by'] = Auth::guard('admin')->user()->id;
             $this->bannerRepository->create($banner);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
             $this->uploadImage->handleUnlinkImage($fileName);
             record_error_log($e);
             return back()->with('msg', __('Tạo mới không thành công xin thử lại'));
@@ -93,7 +90,6 @@ class BannerController extends Controller
     public function update(BannerRequest $request, $id)
     {
         try {
-            DB::beginTransaction();
             $inputBanner = $request->validated();
             $banner = $this->bannerRepository->getBannerById($id);
             $fileName = $this->uploadImage->handleUploadedImage($request->file('thumb'));
@@ -102,9 +98,7 @@ class BannerController extends Controller
                 $inputBanner['thumb'] = $fileName;
             }
             $banner->update($inputBanner);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
             record_error_log($e);
         }
 
@@ -119,13 +113,10 @@ class BannerController extends Controller
     public function delete($id)
     {
         try {
-            DB::beginTransaction();
             $this->bannerRepository->delete($id);
-            DB::commit();
             toastr()->success(__('Xóa thành công'), 'Thông báo');
             return back();
         } catch (\Exception $e) {
-            DB::rollback();
             record_error_log($e);
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();

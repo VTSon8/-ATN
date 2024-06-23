@@ -10,9 +10,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\SkuObservable;
 
 class AccountController extends Controller
 {
+
     private $accountRepository;
     private $uploadImage;
 
@@ -39,7 +41,6 @@ class AccountController extends Controller
     public function store(AccountRequest $request)
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $data['password'] = Hash::make($data['password']);
             if (isset($data['avatar'])) {
@@ -48,15 +49,16 @@ class AccountController extends Controller
             $data['created_by'] = Auth::guard('admin')->user()->id;
             $account = $this->accountRepository->createAccount($data);
             $account->assignRole(config('constants.roles')[$account->role_id]);
-            DB::commit();
+
+            toastr()->success(__('Thêm mới thành công'), 'Thông báo');
+            return redirect()->route('admin.accounts.index');
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
             return back();
         }
-        toastr()->success(__('Thêm mới thành công'), 'Thông báo');
-        return redirect()->route('admin.accounts.index');
+
+
     }
 
 
@@ -69,7 +71,6 @@ class AccountController extends Controller
     public function update(AccountRequest $request, $id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $updateAccount = $request->validated();
             $account = $this->accountRepository->getAccountById($id);
             $avatar = $updateAccount['avatar'] ?? null;
@@ -79,12 +80,10 @@ class AccountController extends Controller
                 $updateAccount['avatar'] = $fileName;
             }
             $account->update($updateAccount);
-            DB::commit();
 
             toastr()->success(__('Cập nhật thành công'), 'Thông báo');
             return redirect()->route('admin.accounts.index');
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
             return back();
@@ -96,15 +95,12 @@ class AccountController extends Controller
     public function delete($id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $this->accountRepository->delete($id);
-            DB::commit();
 
             toastr()->success(__('Xóa thành công'), 'Thông báo');
             return back();
         } catch (\Exception $e) {
             record_error_log($e);
-            DB::rollback();
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();
         }

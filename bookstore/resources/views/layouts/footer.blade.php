@@ -52,22 +52,22 @@
                                 </h3>
                                 <ul class="footer-menu ft-mb-content">
                                     <li class="item">
-                                        <a href="/pages/about-us" title="Giới thiệu công ty">Giới thiệu công
+                                        <a href="about-us" title="Giới thiệu công ty">Giới thiệu công
                                             ty</a>
                                     </li>
                                     <li class="item">
                                         <a href="/" title="Tuyển dụng">Tuyển dụng</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/hop-tac-phat-hanh" title="Chương trình đại lý">Chương
+                                        <a href="#" title="Chương trình đại lý">Chương
                                             trình đại lý</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/chinh-sach-bao-mat" title="Chính sách bảo mật">Chính
+                                        <a href="#" title="Chính sách bảo mật">Chính
                                             sách bảo mật</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/chinh-sach-doi-tra" title="Chính sách đổi trả">Chính
+                                        <a href=#" title="Chính sách đổi trả">Chính
                                             sách đổi trả</a>
                                     </li>
                                 </ul>
@@ -78,19 +78,19 @@
                                 </h3>
                                 <ul class="footer-menu ft-mb-content">
                                     <li class="item">
-                                        <a href="/pages/quy-dinh-su-dung">Quy định sử dụng</a>
+                                        <a href="#">Quy định sử dụng</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/huong-dan-mua-hang">Hướng dẫn mua hàng</a>
+                                        <a href="#">Hướng dẫn mua hàng</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/phuong-thuc-thanh-toan">Phương thức thanh toán</a>
+                                        <a href="#">Phương thức thanh toán</a>
                                     </li>
                                     <li class="item">
-                                        <a href="/pages/phuong-thuc-van-chuyen">Phương thức vận chuyển</a>
+                                        <a href="#">Phương thức vận chuyển</a>
                                     </li>
                                     <li class="item">
-                                        <a href="https://reader.book.com/?ref=bottom-footer">Ứng dụng đọc
+                                        <a href="#">Ứng dụng đọc
                                             ebook</a>
                                     </li>
                                 </ul>

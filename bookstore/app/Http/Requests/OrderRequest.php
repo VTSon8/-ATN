@@ -26,13 +26,10 @@ class OrderRequest extends FormRequest
     {
         return [
             'name' => 'required|string|min:3',
-            'email' => ['required', 'string', 'email'],
             'phone' => 'required|max: 13',
-            'province_id' => 'required',
-            'district_id' => 'required',
-            'ward_id' => 'required',
-            'from' => 'required',
             'address' => 'required|string|min:3|max:100',
+            'lat_from' => 'required',
+            'long_from' => 'required',
             'payment_type' => 'required|boolean',
         ];
     }
@@ -44,20 +41,18 @@ class OrderRequest extends FormRequest
             'email.required' => 'Bạn chưa nhập địa chỉ email',
             'phone.required' => 'Bạn chưa nhập số điện thoại',
             'address' => 'Bạn chưa nhập địa chỉ giao hàng',
-            'from.required' => 'Bạn chọn địa chỉ giao hàng',
-            'ward_id.required' => 'Bạn chọn địa chỉ giao hàng'
+            'payment_type' => 'Bạn cần chọn phương thức thanh toán',
         ];
     }
 
     public function attributes()
     {
         return [
-            'name' => 'tên người nhận hàng',
-            'email' => 'địa chỉ email',
-            'phone' => 'số điện thoại',
-            'address' => 'địa chỉ',
+            'name' => 'Tên người nhận hàng',
+            'email' => 'Địa chỉ email',
+            'phone' => 'Số điện thoại',
+            'address' => 'Địa chỉ',
+            'payment_type' => 'Phương thức thanh toán',
         ];
     }
-
-
 }

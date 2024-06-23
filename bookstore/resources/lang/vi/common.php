@@ -23,6 +23,5 @@ return [
         'customer_cancel' => 'Khách hàng đã hủy',
         'staff_cancel' => 'Nhân viên đã hủy',
     ],
-    'search' => 'Nhập từ khóa để tìm kiếm...',
-    'category_name' => 'Tất cả sản phẩm',
+    'search' => 'Nhập từ khóa để tìm kiếm...'
 ];

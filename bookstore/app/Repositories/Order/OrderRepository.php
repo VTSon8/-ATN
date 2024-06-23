@@ -15,10 +15,7 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 
     public function getOrderById($id)
     {
-        return Order::with('province:id,name')
-            ->with('district:id,name,prefix')
-            ->with('ward:id,name,prefix')
-            ->with([
+        return Order::with([
                 'products' => function ($query) {
                     $query->select('name', 'selling_price', 'quantity', 'price');
                 }

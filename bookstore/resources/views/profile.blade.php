@@ -15,7 +15,7 @@
                         <div class="AccountList">
                             <ul class="list-unstyled">
                                 <li class="current"><a href="{{route('profile')}}">Thông tin tài khoản</a></li>
-                                <li class="current"><a href="{{route('profile')}}">Lịch sử đơn hàng</a></li>
+                                <li class="current"><a href="{{route('bill')}}">Lịch sử đơn hàng</a></li>
 {{--                                <li><a href="/account/addresses">Danh sách địa chỉ</a></li>--}}
                                 <li class="last"><a href="{{route('logout')}}">Đăng xuất</a></li>
                             </ul>

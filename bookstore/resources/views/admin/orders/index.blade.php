@@ -42,7 +42,7 @@
                                                 <td class="text-center">{{ data_get($order, 'code') }}</td>
 {{--                                                <td class="text-center">{{ data_get($order, 'name') }}</td>--}}
 {{--                                                <td class="text-center">{{ data_get($order, 'phone') }}</td>--}}
-                                                <td class="text-center">{{ number_format(data_get($order, 'price')) }} ₫</td>
+                                                <td class="text-center">{{ number_format(data_get($order, 'amount')) }} ₫</td>
                                                 <td class="text-center">{{ date('m-d-Y H:i', strtotime(data_get($order, 'created_at'))) }}</td>
                                                 <td style="text-align: center;">
                                                     @switch(intval(data_get($order, 'status')))

@@ -44,18 +44,15 @@ class CategoryController extends Controller
     public function store(CategoryStoreRequest $request): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $data['slug'] = Str::slug($data['name']);
             $data['created_by'] = Auth::guard('admin')->user()->id;
             $this->categoryRepository->createCategory($data);
-            DB::commit();
             toastr()->success(__('Thêm mới thành công'), 'Thông báo');
             return redirect()->route('admin.category.index');
         } catch (\Exception $e) {
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
-            DB::rollBack();
             return back();
         }
     }
@@ -79,14 +76,11 @@ class CategoryController extends Controller
     public function update($id, CategoryStoreRequest $request): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $updateCategory = $request->validated();
             $updateCategory['slug'] = Str::slug($updateCategory['name']);
             $updateCategory['updated_by'] = Auth::guard('admin')->user()->id;
             $this->categoryRepository->updateCategory($id, $updateCategory);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
             return back();
@@ -102,12 +96,9 @@ class CategoryController extends Controller
     public function delete($id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $category = Category::query()->findOrFail($id);
             $category->delete();
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
             record_error_log($e);
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();

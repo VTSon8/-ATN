@@ -9,7 +9,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="//theme.hstatic.net/200000845405/1001223012/14/favicon.png?v=17" type="image/png"/>
     <title>
-        Vinabook - Hiệu s&#225;ch online trực tuyến cho mọi người
+        book - Hiệu s&#225;ch online trực tuyến cho mọi người
     </title>
     <meta name="description"
           content="Hiệu sách online hiện đại và kho sách ebook online tiện lợi, Vinabook là nơi giúp bạn có những cuốn sách đúng với sở thích và cập nhật những đầu sách hay nhất"/>

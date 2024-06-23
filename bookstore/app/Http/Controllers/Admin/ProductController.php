@@ -70,7 +70,6 @@ class ProductController extends Controller
     public function store(ProductStoreRequest $request)
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $data['created_by'] = Auth::guard('admin')->user()->id;
             $data['slug'] = Str::slug($data['name']);
@@ -80,9 +79,7 @@ class ProductController extends Controller
             if (isset($data['images'])) {
                 $this->uploadMultipleFiles($newProduct->id, $data['images']);
             }
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->uploadImage->handleUnlinkImage($data['thumb']);
             record_error_log($e);
             toastr()->error(__('Lỗi hệ thống'), 'Thông báo');
@@ -112,7 +109,6 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, $id)
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $updateProduct = $this->productRepository->getProductById($id);
             if (isset($data['thumb'])) {
@@ -125,9 +121,7 @@ class ProductController extends Controller
                 $this->uploadMultipleFiles($updateProduct->id, $data['images']);
             }
             $updateProduct->update($data);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             return back();
         }
@@ -142,11 +136,8 @@ class ProductController extends Controller
     public function delete($id)
     {
         try {
-            DB::beginTransaction();
             $this->productRepository->deleteProduct($id);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
             record_error_log($e);
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();
@@ -174,14 +165,11 @@ class ProductController extends Controller
     public function updateProductQuantity(ProductUpdateRequest $request, $id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $quantityInput = $request->validated();
             $product = $this->productRepository->getProductById($id);
             $number['number'] = $product->number + (int)$quantityInput['number'];
             $product->update($number);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             return back();
         }
@@ -197,12 +185,9 @@ class ProductController extends Controller
     public function updateStatus(ProductUpdateRequest $request, $id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $product = $request->validated();
             $this->productRepository->updateProductStatus($id, $product['status']);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Cập nhật thất baị'), 'Thông báo');
             return back();
@@ -243,15 +228,12 @@ class ProductController extends Controller
      */
     public function foreverDelete($id): RedirectResponse
     {
-        DB::beginTransaction();
         try {
             $product = $this->productRepository->getProductByIdOnlyTrashed($id);
             $this->uploadImage->handleUnlinkImage($product->thumb);
             $this->destroyMultipleFiles($product->id);
             $this->productRepository->foreverDeleteProductById($id);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();
@@ -291,7 +273,6 @@ class ProductController extends Controller
 
     private function destroyMultipleFiles($productId)
     {
-        DB::beginTransaction();
         try {
             $images = Image::where('product_id', $productId)->get();
 
@@ -300,9 +281,7 @@ class ProductController extends Controller
                 $image->delete();
             }
 
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollback();
             record_error_log($e);
         }
     }

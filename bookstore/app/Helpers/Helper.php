@@ -5,3 +5,4 @@ if (!function_exists('record_error_log')) {
         \Illuminate\Support\Facades\Log::error($e);
     }
 }
+

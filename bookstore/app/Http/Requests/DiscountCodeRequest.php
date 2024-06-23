@@ -30,7 +30,8 @@ class DiscountCodeRequest extends FormRequest
                 'required',
                 'string',
                 'min:3',
-                'max:10'
+                'max:10',
+                'exists:discounts,code',
             ]
         ];
     }
@@ -45,7 +46,7 @@ class DiscountCodeRequest extends FormRequest
     public function attributes()
     {
         return [
-          'code' => trans('messages.code'),
+            'code' => trans('messages.code'),
         ];
     }
 

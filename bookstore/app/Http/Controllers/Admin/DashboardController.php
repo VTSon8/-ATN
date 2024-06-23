@@ -37,9 +37,9 @@ class DashboardController extends Controller
                 ->withSum('order_product', 'quantity')
                 ->get();
 
-            $revenueMonth[] = $orderFollowMonth->sum('price');
+            $revenueMonth[] = $orderFollowMonth->sum('amount');
             $total_orders = $orderFollowMonth->count();
-            $total_revenue += $orderFollowMonth->sum('price');
+            $total_revenue += $orderFollowMonth->sum('amount');
             $total_products = $orderFollowMonth->sum('order_product_sum_quantity');
             $monthOfYear = $year.'/'.($i <= 9 ? "0$i" : $i);
             $data[$i] = [$monthOfYear, $total_products, $total_orders];
@@ -55,13 +55,10 @@ class DashboardController extends Controller
     }
 
     public function store(ConfigRequest $request) {
-        DB::beginTransaction();
         try {
             $config = $request->validated();
             Config::updateOrCreate(['id' => 1], $config);
-            DB::commit();
         }catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             abort(503);
         }

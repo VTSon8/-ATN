@@ -329,16 +329,6 @@
 
 @push('js')
     <script type="text/javascript">
-        // const VND = new Intl.NumberFormat('vi-VN', {
-        //     style: 'currency',
-        //     currency: 'VND',
-        // });
-        //
-        // $('#original_price').on('input', function () {
-        //     let original_price = parseInt($(this).val().replace(/\D/g, '')); // Remove non-numeric characters
-        //     $(this).val(VND.format(original_price));
-        // });
-
         $(document).ready(function () {
             $(document).on('click', '#btn_slider', function () {
                 $('#upload_slider').submit();

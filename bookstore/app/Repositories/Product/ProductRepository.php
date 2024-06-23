@@ -11,8 +11,10 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 {
 
     const DEFAULT_SALE = 8;
+    const DEFAULT_CATE= 12;
     const DEFAULT_RELATA = 4;
     const DEFAULT_SELLING = 5;
+
     public function getAllProduct($key_word = null)
     {
         return $this->model->query()->when($key_word, function ($query) use ($key_word) {
@@ -24,11 +26,69 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
             ->paginate(config('constants.pagination'));
     }
 
-    public function getfeaturedBooks() {
+    public function search($params = [])
+    {
+        $query = $this->model->select('categories.id', 'categories.slug', 'products.*')
+            ->join('categories', 'categories.id', '=', 'products.category_id')
+            ->when($params['slug'], function ($q) use ($params){
+                return $q->where('categories.slug', '=', $params['slug']);
+            })
+            ->when(isset($params['supplier']), function ($q) use ($params){
+                $supplier = explode(',', $params['supplier']);
+                return $q->whereIn('products.supplier_id', $supplier);
+            })
+            ->when(isset($params['price']), function ($q) use ($params){
+                $jsonArray = '[' . $params['price'] . ']';
+                $conditions = json_decode($jsonArray, true);
+                foreach ($conditions as $condition) {
+                    $field = $condition['field'];
+                    $operator = $condition['operator'];
+                    $value = $condition['value'];
+
+                    switch ($operator) {
+                        case '<=':
+                        case '>=':
+                        case '<':
+                        case '>':
+                        $q->where('products.'. $field, $operator, $value);
+                            break;
+                        case 'between':
+                            $secondValue = $condition['second_value'];
+                            $q->whereBetween('products.'. $field, [$value, $secondValue]);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                return $q;
+            })
+            ->when(isset($params['type']), function ($q) use ($params){
+                $form = explode(',', $params['type']);
+                return $q->whereIn('products.form', $form);
+            })
+            ->when(isset($params['author']), function ($q) use ($params){
+                $author = explode(',', $params['author']);
+                return $q->whereIn('products.author', $author);
+            })
+            ->when(isset($params['option']), function ($q) use ($params){
+                $option = $params['option'];
+                return $q->orderBy($option['column'], $option['dir']);
+            });
+
+
+        return $query->paginate(self::DEFAULT_CATE);
+        Product::query()->paginate();
+    }
+
+
+    public function getfeaturedBooks()
+    {
         return $this->model->orderBy('sale', 'DESC')->limit(self::DEFAULT_SALE)->get();
     }
 
-    public function getSellingBooks() {
+    public function getSellingBooks()
+    {
         return $this->model->orderBy('number_buy', 'desc')->limit(self::DEFAULT_SELLING)->get();
     }
 
@@ -36,7 +96,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         return $this->model->when($key_word, function ($query) use ($key_word) {
             $query->where('name', 'like', "%$key_word%")
-            ->orWhere('author', 'like', "%$key_word%");
+                ->orWhere('author', 'like', "%$key_word%");
         })->orderBy($sortBy['column'], $sortBy['sort'])
             ->paginate(config('constants.PER_PAGE'));
     }

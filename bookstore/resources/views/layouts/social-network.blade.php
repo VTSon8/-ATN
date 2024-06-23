@@ -1,10 +1,10 @@
 <div id="fixed-social-network" class="d-none d-sm-block">
-    <a href="https://zalo.me/0765808644" class="zalo-icon" target="_blank">
+    <a href="https://zalo.me/ZIDaWdee2dsYFZ+" class="zalo-icon" target="_blank">
         <img class="img-fluid" alt="Icon-Zalo"
              src="https://file.hstatic.net/200000259495/file/zalo_d9dc3417eb744b91a44643f29b8c7161.svg">
         Zalo
     </a>
-    <a href="https://www.facebook.com/vinabook" class="messenger-icon" target="_blank">
+    <a href="https://www.facebook.com/book" class="messenger-icon" target="_blank">
         <img class="img-fluid" alt="Icon-Messager"
              src="https://file.hstatic.net/200000259495/file/messager_208d7389c4ac46b5a01afad457684cd6.svg">
         Messenger

@@ -19,12 +19,9 @@ class Order extends Model
         'customer_id',
         'name',
         'phone',
-        'price',
-        'price_ship',
+        'amount',
+        'fee',
         'discount',
-        'province_id',
-        'district_id',
-        'ward_id',
         'payment_type',
         'payment_status',
         'address',
@@ -99,7 +96,7 @@ class Order extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'order_product')->withPivot(['quantity', 'price']);
+        return $this->belongsToMany(Product::class, 'order_products')->withPivot(['quantity', 'price']);
     }
 
     public function order_product()

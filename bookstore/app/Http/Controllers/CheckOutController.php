@@ -7,11 +7,15 @@ use App\Mail\OrderMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderProduct;
+use App\Models\Product;
 use App\Repositories\Discount\DiscountRepositoryInterface;
 use App\Services\CartService;
+use App\Services\LocationService;
 use App\Utilities\VNPay;
 use Carbon\Carbon;
 use Gloudemans\Shoppingcart\Facades\Cart;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -24,24 +28,18 @@ class CheckOutController extends Controller
 {
 
     private $discountRepository;
-    private $provinceRepo;
-    private $districtRepo;
-    private $wardRepo;
+    private $locationService;
 
     private $cartService;
 
     public function __construct(
-//        ProvinceRepositoryInterface $provinceRepo,
-//        DistrictRepositoryInterface $districtRepo,
-//        WardRepositoryInterface $wardRepo,
         DiscountRepositoryInterface $discountRepository,
-        CartService $cartService
+        CartService $cartService,
+        LocationService $locationService
     ) {
-//        $this->provinceRepo = $provinceRepo;
-//        $this->districtRepo = $districtRepo;
-//        $this->wardRepo = $wardRepo;
         $this->discountRepository = $discountRepository;
         $this->cartService = $cartService;
+        $this->locationService = $locationService;
     }
 
     public function index($id = null)
@@ -51,66 +49,27 @@ class CheckOutController extends Controller
             return back();
         }
 
-        if(!is_null($id)) {
-            $qty = 1;
-            $this->cartService->handleAddToCart((int)$id, $qty);
-        }
-
         return view('checkout');
     }
 
     public function order(OrderRequest $request)
     {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-            $order = $request->validated();
-            $order['discount'] = 0;
-            $shippingAddress = session('shipping_address');
-            $shippingPrice = (int)session('shipping_price');
-            if (empty($shippingAddress) || is_null($shippingPrice)) {
-                toastr()->warning(__('Địa chỉ nhận hàng không đúng hoặc đơn vị giao hàng của chúng tôi không hỗ trợ'),
-                    'Thông báo');
-                return back();
-            }
-
-            if (session()->has('coupon')) {
-                $code = session('coupon.code');
-                $coupon = $this->discountRepository->getDiscountByCode($code);
-                if ($coupon) {
-                    $order['discount'] = $coupon->discount;
-                    $coupon->update(['number_used' => $coupon->number_used + 1]);
-                } else {
-                    session()->forget('coupon');
-                    return back()->with('info', __('Mã giảm giá hiện tại không khả dụng'));
-                }
-            }
-
-            $total = intval(str_replace(',', '', Cart::total()));
-            $order['code'] = Str::random(8);
-            $order['customer_id'] = Auth::user()->id;
-            $order['price'] = $total + $shippingPrice - $order['discount'];
-            $order['price_ship'] = $shippingPrice;
-
-            $orderNew = Order::create($order);
-
-            $cartItems = Cart::content();
-
-            foreach ($cartItems as $cart) {
-                $orderProduct = OrderProduct::create(
-                    [
-                        'order_id' => $orderNew->id,
-                        'product_id' => $cart->id,
-                        'quantity' => $cart->qty,
-                        'price' => (int)$cart->price * (int)$cart->qty,
-                    ]
-                );
-
-                $orderProductNew[] = $orderProduct;
-                $product = $orderProduct->product;
-                $product->decrement('number', $orderProduct->quantity);
-                $product->increment('number_buy', $orderProduct->quantity);
-            }
-
+            $bill = $request->only(['name', 'phone', 'address', 'payment_type']);
+            $bookPurchaseData = $this->cartService->getData();
+            $discount = $this::getItem('discount') ?? 0;
+            $transportFee = $this::getItem('transport_fee') ?? 0;
+            $bill['code'] = Str::random(9);
+            $bill['discount'] = $discount;
+            $bill['fee'] = $transportFee;
+            $bill['customer_id'] = Auth::user()->id;
+            $bill['amount'] = ($bookPurchaseData['total_money'] - $discount) + $transportFee;
+            $order = Order::create($bill);
+            $dataList = array_map(function ($item) use ($order) {
+                return array_merge($item, ['order_id' => $order->id]);
+            }, $bookPurchaseData['data']);
+            OrderProduct::insert($dataList);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -118,22 +77,20 @@ class CheckOutController extends Controller
             return back();
         }
 
-        if ($order['payment_type'] == 1) {
-//            $this->hanldeOnlinePayment($orderNew);
+        if ($bill['payment_type'] == 1) {
             $data_url = VNPay::vnpay_create_payment([
-                'vnp_TxnRef' => $orderNew->id,
-                'vnp_OrderInfo' => "Mã đơn hàng: #$orderNew->code",
-                'vnp_Amount' => $orderNew->price,
+                'vnp_TxnRef' => $order->id,
+                'vnp_OrderInfo' => "Mã đơn hàng: #$order->code",
+                'vnp_Amount' => $order->amount,
             ]);
 
             return redirect()->to($data_url);
         }
 
-        $this->sendEmail($orderNew);
-        session()->forget(['coupon', 'shipping_price', 'shipping_address']);
-        Cart::destroy();
-
-        return view('success-order', compact('orderNew', 'orderProductNew'));
+        $this::deleteItem('discount');
+        $this::deleteItem('transport_fee');
+        $this->cartService->flashCart();
+        return redirect()->route('bill');
     }
 
     public function vnPayCheck(Request $request)
@@ -141,30 +98,37 @@ class CheckOutController extends Controller
         $vnp_ResponseCode = $request->get('vnp_ResponseCode');
         $vnp_TxnRef = $request->get('vnp_TxnRef');
         $vnp_Amount = $request->get('vnp_Amount');
+        try {
+            if ($vnp_ResponseCode != null) {
+                if ($vnp_ResponseCode == 0) {
+                    $orderNew = Order::findOrFail($vnp_TxnRef);
+                    $orderNew->update(['payment_status' => Order::PAID, 'status' => Order::PREPARE]);
+//                Product::update($bookPurchaseData['recalculate_product_quantity']);
+                    $this::deleteItem('discount');
+                    $this::deleteItem('transport_fee');
+                    $this->cartService->flashCart();
 
-        if ($vnp_ResponseCode != null) {
-            if ($vnp_ResponseCode == 0) {
-                $orderNew = Order::findOrFail($vnp_TxnRef);
-                $orderProductNew = OrderProduct::query()->where('order_id', $orderNew->id)->get();
-                $orderNew->update(['payment_status' => Order::PAID, 'status' => Order::PREPARE]);
-                $this->sendEmail($orderNew);
-                session()->forget(['coupon', 'shipping_price', 'shipping_address']);
-                Cart::destroy();
-
-                return view('cart.success-order', compact('orderNew', 'orderProductNew'));
-            } elseif ($vnp_ResponseCode == 24) {
-                Order::findOrFail($vnp_TxnRef)->delete();
-                toastr()->warning(__('Bạn đã hủy giao dịch thanh toán trực tuyến!'), 'Thông báo');
-                return back();
-            } else {
-                Order::findOrFail($vnp_TxnRef)->delete();
-                toastr()->error(trans('payment.error_vnPay'), 'Thông báo');
-                return back();
+                    return redirect()->route('bill');
+                } elseif ($vnp_ResponseCode == 24) {
+                    Order::findOrFail($vnp_TxnRef)->delete();
+                    toastr()->warning(__('Bạn đã hủy giao dịch thanh toán trực tuyến!'), 'Thông báo');
+                    return redirect()->route('checkout.index');
+                } else {
+                    Order::findOrFail($vnp_TxnRef)->delete();
+                    toastr()->error(trans('payment.error_vnPay'), 'Thông báo');
+                    return redirect()->route('checkout.index');
+                }
             }
+        } catch (\Exception $e) {
+            record_error_log($e);
         }
     }
 
-    private function hanldeOnlinePayment($orderNew)
+    /**
+     * @param $orderNew
+     * @return RedirectResponse
+     */
+    private function hanldeOnlinePayment($orderNew): \Illuminate\Http\RedirectResponse
     {
         $data_url = VNPay::vnpay_create_payment([
             'vnp_TxnRef' => $orderNew->id,
@@ -175,34 +139,37 @@ class CheckOutController extends Controller
         return redirect()->to($data_url);
     }
 
-    private function sendEmail($order)
+
+    /**
+     * @return JsonResponse
+     */
+    public function getProvinces(): JsonResponse
     {
-//        $email_to = $order->customer->email;
-        $orderProduct = OrderProduct::query()->where('order_id', data_get($order, 'id'))->get();
-        $this->dispatch(new SendOrderEmail($order, $orderProduct));
-//        Mail::to($email_to)->send(new OrderMail($order, $orderProduct));
+        $provinces = $this->locationService->getProvinces();
+
+        return response()->json(['items' => $provinces], 200);
     }
 
-
-    public function getProvinces()
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function getDistricts($id): JsonResponse
     {
-        $all = $this->provinceRepo->getAllProvince();
+        $districts = $this->locationService->getDistricts($id);
 
-        return response()->json($all);
+        return response()->json(['items' => $districts], 200);
     }
 
-    public function getDistricts($id)
+    /**
+     * @param $id
+     * @return JsonResponse
+     */
+    public function getWards($id): \Illuminate\Http\JsonResponse
     {
-        $all = $this->districtRepo->getAllDistrictByProvince($id);
+        $wards = $this->locationService->getWards($id);
 
-        return response()->json($all);
-    }
-
-    public function getWards($id)
-    {
-        $all = $this->wardRepo->getAllWardByDistricts($id);
-
-        return response()->json($all);
+        return response()->json(['items' => $wards], 200);
     }
 
 

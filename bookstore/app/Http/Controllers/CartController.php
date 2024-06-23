@@ -14,17 +14,11 @@ use Illuminate\Support\Facades\URL;
 class CartController extends Controller
 {
 
-    private $productRepository;
-    private $discountRepository;
     private $cartService;
 
     public function __construct(
-        ProductRepositoryInterface $productRepository,
-        DiscountRepositoryInterface $discountRepository,
         CartService $cartService
     ) {
-        $this->productRepository = $productRepository;
-        $this->discountRepository = $discountRepository;
         $this->cartService = $cartService;
     }
 
@@ -118,54 +112,5 @@ class CartController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 503);
         }
     }
-
-    public function applyCoupon(DiscountCodeRequest $request)
-    {
-        if (session()->has('coupon')) {
-            return response()->json(404, 'NG', ['message' => trans('messages.unique_code')]);
-        }
-
-        $code = $request->validated();
-        $responseData = [];
-        $total_price = intval(str_replace(',', '', Cart::total()));
-        $coupon = $this->discountRepository->getDiscountByCode(data_get($code, 'code'));
-
-        if (!$coupon) {
-            return response()->json(404, 'NG', ['message' => trans('messages.valid')]);
-        }
-
-        if ($coupon->expiration_date < now()) {
-            $responseData['message'] = trans(
-                'messages.coupon_expired',
-                ['code' => $coupon->code, 'date' => $coupon->expiration_date]
-            );
-        } elseif ($coupon->limit_number - $coupon->number_used == 0) {
-            $responseData['message'] = trans('messages.coupon_used_up', ['code' => $coupon->code]);
-        } elseif ($coupon->payment_limit >= $total_price) {
-            $responseData['message'] = trans(
-                'messages.coupon_limit_message',
-                ['payment_limit' => number_format($coupon->payment_limit)]
-            );
-        } else {
-            $couponData = [
-                'code' => $coupon->code,
-                'discount' => $coupon->discount
-            ];
-            session()->put('coupon', $couponData);
-            return response()->json(200, 'OK', $couponData);
-        }
-
-        return response()->json(404, 'NG', $responseData);
-    }
-
-    public function removeCoupon()
-    {
-        if (session()->has('coupon')) {
-            session()->forget('coupon');
-        }
-
-        return response()->json(200, 'OK', []);
-    }
-
 
 }

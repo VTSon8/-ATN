@@ -12,7 +12,7 @@
 */
 
 return [
-    'system_name' => 'Hệ thống bán hàng Books Store',
+    'system_name' => 'Hệ thống bán hàng Shop Girds',
     'failed'   => 'Thông tin tài khoản hoặc mật khẩu không chính xác.',
     'password' => 'Mật khẩu không đúng.',
     'throttle' => 'Vượt quá số lần đăng nhập cho phép. Vui lòng thử lại sau :seconds giây.',

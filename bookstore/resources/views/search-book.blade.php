@@ -12,7 +12,7 @@
                     </div>
                     <div class="wrapbox-content-page">
                         <div class="content-page" id="search">
-                            <p class="subtext-result"> Kết quả tìm kiếm cho <strong>"da"</strong>. </p>
+                            <p class="subtext-result"> Kết quả tìm kiếm cho <strong>{{request('q', '')}}</strong>. </p>
                             <div class="results content-product-list section-box-bg">
                                 <div class=" search-list-results row">
                                     @foreach($books as $book)
@@ -28,17 +28,17 @@
                                                             alt="{{ data_get($book, 'name') }}"/>
                                                     </a>
                                                     <div class="button-add d-none d-md-flex">
-                                                        <button type="button" class="btnQuickView quick-view"
-                                                                data-handle="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                                                data-tooltip="Xem nhanh"><i class="fal fa-search-plus"
-                                                                                            aria-hidden="true"></i>
-                                                        </button>
+{{--                                                        <button type="button" class="btnQuickView quick-view"--}}
+{{--                                                                data-handle="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"--}}
+{{--                                                                data-tooltip="Xem nhanh"><i class="fal fa-search-plus"--}}
+{{--                                                                                            aria-hidden="true"></i>--}}
+{{--                                                        </button>--}}
                                                         <button title="Thêm vào giỏ" class="action "
                                                                 onclick="add_to_cart('{{$book->id}}');"
                                                                 data-tooltip="Thêm vào giỏ"><i
                                                                 class="fal fa-cart-plus"></i></button>
-                                                        <a href="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                                           data-tooltip="Chi tiết"><i class="fal fa-eye"></i></a>
+{{--                                                        <a href="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"--}}
+{{--                                                           data-tooltip="Chi tiết"><i class="fal fa-eye"></i></a>--}}
                                                     </div>
 
                                                 </div>

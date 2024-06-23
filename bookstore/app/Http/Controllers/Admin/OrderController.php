@@ -49,15 +49,12 @@ class OrderController extends Controller
     public function orderStatusUpdate(OrderStatusRequest $request, $id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $orderStatus = $request->validated();
             if (isset($orderStatus['status']) && $orderStatus['status'] == Order::DELIVERED) {
                 $orderStatus['payment_status'] = Order::PAID;
             }
             $this->orderRepository->updateOrder($id, $orderStatus);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             return back();
         }
@@ -74,6 +71,7 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = $this->orderRepository->getOrderById($id);
+
         return view('admin.orders.detail', compact('order'));
     }
 
@@ -85,16 +83,13 @@ class OrderController extends Controller
     public function delete($id): RedirectResponse
     {
         try {
-            DB::beginTransaction();
             $order = $this->orderRepository->getOrderById($id);
             if ($order && $order->status == config('constants.order_status.delivering')) {
                 toastr()->warning(__('Đơn hàng '.$order->code.' đang được giao, không thể lưu !'), 'Thông báo');
                 return back();
             }
             $this->orderRepository->delete($id);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             return back();
         }

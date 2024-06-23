@@ -63,7 +63,7 @@
                                                         </div>
                                                     </td>
                                                     <td class="item" width="420px">
-                                                        <h3><a href="{{ url('assets/upload/' . data_get($book, 'options.image')) }}">{{ data_get($book, 'name') }}</a></h3>
+                                                        <h3><a href="{{ route('product.details', ['slug' => data_get($book, 'options.slug')]) }}">{{ data_get($book, 'name') }}</a></h3>
                                                         <p class="variant"></p><p></p>
                                                     </td>
                                                     <td class="item">

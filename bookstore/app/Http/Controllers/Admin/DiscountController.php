@@ -35,13 +35,10 @@ class DiscountController extends Controller
     public function store(DiscountRequest $request)
     {
         try {
-            DB::beginTransaction();
             $discount = $request->validated();
             $discount['created_by'] = Auth::guard('admin')->user()->id;
             $this->discountRepo->createDiscount($discount);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
             return back();
@@ -58,12 +55,9 @@ class DiscountController extends Controller
     public function update(DiscountRequest $request, $id)
     {
         try {
-            DB::beginTransaction();
             $discount = $request->validated();
             $this->discountRepo->updateDiscount($id, $discount);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Xảy ra lỗi'), 'Thông báo');
             return back();

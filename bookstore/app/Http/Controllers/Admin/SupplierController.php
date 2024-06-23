@@ -50,16 +50,13 @@ class SupplierController extends Controller
     public function store(SupplierStoreRequest $request)
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $data['created_by'] = Auth::guard('admin')->user()->id;
             $this->supplierRepository->createsupplier($data);
-            DB::commit();
 
             toastr()->success(__('Thêm mới thành công'), 'Thông báo');
             return redirect()->route('admin.supplier.index');
         } catch (\Exception $e) {
-            DB::rollBack();
             record_error_log($e);
             toastr()->error(__('Đã xảy ra lỗi'), 'Thông báo');
             return back();
@@ -84,13 +81,10 @@ class SupplierController extends Controller
     public function update(SupplierUpdateRequest $request, $id)
     {
         try {
-            DB::beginTransaction();
             $data = $request->validated();
             $updatesupplier = $this->supplierRepository->getsupplierById($id);
             $updatesupplier->update($data);
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
             toastr()->error(__('Cập nhật không thành công'), 'Thông báo');
             return back();
         }
@@ -105,9 +99,7 @@ class SupplierController extends Controller
     public function delete($id)
     {
         try {
-            DB::beginTransaction();
             $this->supplierRepository->deletesupplier($id);
-            DB::commit();
         } catch (Exception $e) {
             DB::rollback();
             record_error_log($e);

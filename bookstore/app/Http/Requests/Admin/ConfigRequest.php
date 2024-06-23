@@ -27,8 +27,8 @@ class ConfigRequest extends FormRequest
             'name' => 'required',
             'longitude' => 'required',
             'latitude' => 'required',
-            'km_prices.*.km' => 'required|min:2|max:2000',
-            'km_prices.*.price_ship' => 'required|min:3|max:1000000'
+            'km_prices.*.km' => 'required|max:2000',
+            'km_prices.*.price_ship' => 'required|max:1000000'
         ];
     }
 

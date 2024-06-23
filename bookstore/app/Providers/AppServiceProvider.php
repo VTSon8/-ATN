@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,16 @@ class AppServiceProvider extends ServiceProvider
                 $view->with([
                     'categories' => $categories,
                     'sellingBooks' => $sellingBooks,
+                ]);
+            }
+
+            if (in_array($viewName, ['book_by_category'])) {
+                $authors = Product::distinct()->pluck('author');
+                $suppliers = Supplier::all();
+
+                $view->with([
+                    'authors' => $authors,
+                    'suppliers' => $suppliers,
                 ]);
             }
 

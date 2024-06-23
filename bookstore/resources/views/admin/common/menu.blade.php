@@ -74,11 +74,11 @@
                             <i class="fa fa-users"></i> Nhân viên
                         </a>
                     </li>
-                    <li>
-                        <a href="{{ route('admin.logs_viewer') }}">
-                            <img src="{{ asset('assets/images/bug-solid.svg') }}" alt="bug" style="width: 16px;height: 16px;"> Log-Viewer
-                        </a>
-                    </li>
+{{--                    <li>--}}
+{{--                        <a href="{{ route('admin.logs_viewer') }}">--}}
+{{--                            <img src="{{ asset('assets/images/bug-solid.svg') }}" alt="bug" style="width: 16px;height: 16px;"> Log-Viewer--}}
+{{--                        </a>--}}
+{{--                    </li>--}}
                 </ul>
             </li>
             <li><a href="javascript:void(0);" onclick="event.preventDefault(); document.getElementById('form_logout').submit();"><i class="fa fa-sign-out text-red"></i> <span>Thoát</span></a></li>

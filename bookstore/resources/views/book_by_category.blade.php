@@ -12,7 +12,7 @@
                                 <div class="block left-module">
                                     <div class=" filter_xs">
                                         <div class="layered">
-                                            @include('component.filter-books')
+                                            @include('component.filter-books', ['authors' => $authors, 'suppliers' => $suppliers])
                                             @include('component.sidebar', ['promotionalProducts' => $promotionalProducts])
                                         </div>
                                     </div>
@@ -74,9 +74,8 @@
                                         <div class="option browse-tags">
                                             <label class="lb-filter hide" for="sort-by">Sắp xếp theo:</label>
                                             <span class="custom-dropdown custom-dropdown--grey borderFilterMobile">
-                                                <select id="sortControl" class="sort-by custom-dropdown__select form-control input-sm"
-                                                        onchange="sortby()"
-                                                        data-search="{{ isset($key_word) ? $key_word : '' }}">
+                                                <select id="sortControl" class="sort-by custom-dropdown__select"
+                                                        data-search="">
                                                         <option value="number_buy-desc" selected>Bán chạy nhất</option>
                                                         <option value="name-asc">A → Z</option>
                                                         <option value="name-desc">Z → A</option>
@@ -111,7 +110,7 @@
                         </div>
 
                         <div class=" filter-here section-box-bg">
-                            <div class="row content-product-list product-list filter clearfix">
+                            <div class="row content-product-list product-list filter clearfix" id="cate-books">
                                 @foreach($books as $book)
                                 <div class="col-md-4 col-6">
                                     <div class="product-item">
@@ -124,17 +123,10 @@
                                                     alt="S&#225;ch Đa Tương T&#225;c - Cơ Thể Của Ch&#250;ng Ta"/>
                                             </a>
                                             <div class="button-add d-none d-md-flex">
-                                                <button type="button" class="btnQuickView quick-view"
-                                                        data-handle="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                                        data-tooltip="Xem nhanh">
-                                                    <i class="fal fa-search-plus" aria-hidden="true"></i>
-                                                </button>
                                                 <button title="Thêm vào giỏ" class="action "
                                                         onclick="add_to_cart('{{$book->id}}');"
                                                         data-tooltip="Thêm vào giỏ"><i class="fal fa-cart-plus"></i>
                                                 </button>
-                                                <a href="{{ route('product.details', ['slug' => data_get($book, 'slug')]) }}"
-                                                   data-tooltip="Chi tiết"><i class="fal fa-eye"></i></a>
                                             </div>
                                         </div>
                                         <div class="product-detail">
@@ -172,68 +164,62 @@
 
 @push('js')
     <script>
-        function sortByData(data) {
-            console.log(data);
-            let content = '';
-            $.each(data, function (key, item) {
-                let discount = '';
-                if (item.sale) {
-                    discount = `<div class="giam-percent">
-                                    <span class="text-giam-percent">Giảm ${item.sale + '%' ?? ''}</span>
-                                </div>`;
-                }
-                content +=
-                    `<div class="col-md-3 col-lg-3 col-xs-6 col-6">
-                    <div class="product-lt">
-                        <div class="lt-product-group-image">
-                            <a href="{{ url('/') }}/${item.slug}">
-                                <img class="img-p"
-                                     src="{{ url('assets/upload/') }}/${item.thumb}"
-                                     alt="">
-                            </a>
-                        ${discount}
-                        </div>
-                        <div class="lt-product-group-info">
-                            <a href="{{ url('/') }}/${item.slug}">
-                                <h3>${item.name}</h3>
-                            </a>
-                            <div class="price-box">
-                                <p class="old-price">
-                                    <span
-                                        class="price ${item.sale ?? 'not-sale'}">${VND.format(item.original_price)}</span>
-                                </p>
-                                <p class="special-price">
-                                    <span class="price">${VND.format(item.selling_price)}</span>
-                                </p>
-                            </div>
-                            <div class="clear"></div>
-                        </div>
-                    </div>
-                </div>`;
-            });
+        // function sortByData(data) {
+        //     console.log(data);
+        //     let content = '';
+        //     $.each(data, function (key, item) {
+        //         content +=
+        //             `<div class="col-md-4 col-6">
+        //                 <div class="product-item">
+        //                     <div class="product-img " style="border: none;">
+        //                         <div class="product-sale" style="background: #f03737;"><span>-${item.sale}%</span>
+        //                         </div>
+        //                         <a href="${item.sale}">
+        //                             <img
+        //                                 src="${item.sale}"
+        //                                 alt="S&#225;ch Đa Tương T&#225;c - Cơ Thể Của Ch&#250;ng Ta"/>
+        //                         </a>
+        //                         <div class="button-add d-none d-md-flex">
+        //                             <button title="Thêm vào giỏ" class="action "
+        //                                     onclick="add_to_cart('${item.sale}');"
+        //                                     data-tooltip="Thêm vào giỏ"><i class="fal fa-cart-plus"></i>
+        //                             </button>
+        //                         </div>
+        //                     </div>
+        //                     <div class="product-detail">
+        //                         <h3 class="pro-name"><a
+        //                                 href="${item.sale}"
+        //                                 title="${item.sale}">${item.sale}</a></h3>
+        //                         <p class="pro-price highlight">
+        //                             <span class="current-price">${item.sale}₫</span>
+        //                             <del class="compare-price">${item.sale}₫</del>
+        //                         </p>
+        //                     </div>
+        //                 </div>
+        //             </div>`;
+        //     });
+        //
+        //     $('#cate-books').html(content);
+        // }
 
-            $('#show-product').html(content);
-        }
-
-        function sortby(page = null) {
-            let option = $('#sortControl').val();
-            let slug = $('#show-product').data('slug');
-            let key_word = $('#sortControl').data('search');
-            var strurl = `{{ route('show') }}`;
-            jQuery.ajax({
-                url: strurl,
-                type: 'POST',
-                dataType: 'json',
-                data: {slug: slug, sort: option, key_word: key_word, page: page},
-                success: function (data) {
-                }
-            }).always(function (response) {
-                if (response.code == 200) {
-                    sortByData(response.items.product.data);
-                    $('#pagination-container').html(response.items.pagination);
-                }
-            });
-        }
+        {{--function sortby(page = null) {--}}
+        {{--    let option = $('#sortControl').val();--}}
+        {{--    let slug = $('#show-product').data('slug');--}}
+        {{--    var strurl = `{{ route('search_books_category') }}`;--}}
+        {{--    jQuery.ajax({--}}
+        {{--        url: strurl,--}}
+        {{--        type: 'POST',--}}
+        {{--        dataType: 'json',--}}
+        {{--        data: {slug: slug, sort: option, key_word: key_word, page: page},--}}
+        {{--        success: function (data) {--}}
+        {{--        }--}}
+        {{--    }).always(function (response) {--}}
+        {{--        if (response.code == 200) {--}}
+        {{--            sortByData(response.items.books.data);--}}
+        {{--            $('#pagination-container').html(response.items.pagination);--}}
+        {{--        }--}}
+        {{--    });--}}
+        {{--}--}}
 
         $(document).on('click', '.pagination a', function (event) {
             event.preventDefault();

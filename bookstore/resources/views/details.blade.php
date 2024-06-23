@@ -95,7 +95,7 @@
                                                         class="add-to-cartProduct btn btn-primary" style="width: 50%">
                                                     Thêm vào giỏ
                                                 </button>
-                                                <a id="buy-now" href="{{route('checkout.index', $product->id)}}"
+                                                <a id="buy-now" href="javascript:void(0)" onclick="buy_now('{{$product->id}}')"
                                                    class=" add-to-cartProduct btn btn-dark" style="width: 50%">
                                                     Mua ngay
                                                 </a>
@@ -134,10 +134,10 @@
                                             </td>
                                         </tr>
                                         @if(data_get($product, 'author', ''))
-                                        <tr>
-                                            <th>Tác giả</th>
-                                            <td>{{ data_get($product, 'author', '') }}</td>
-                                        </tr>
+                                            <tr>
+                                                <th>Tác giả</th>
+                                                <td>{{ data_get($product, 'author', '') }}</td>
+                                            </tr>
                                         @endif
                                         @if(data_get($product, 'translator', ''))
                                             <tr>
@@ -226,28 +226,47 @@
 
 @push('js')
     <script>
-        var plusQuantity = function() {
+        var plusQuantity = function () {
             var self = $(this);
-            if (jQuery('input[name="quantity"]').val() != undefined ) {
+            if (jQuery('input[name="quantity"]').val() != undefined) {
                 var currentVal = parseInt(jQuery('input[name="quantity"]').val());
                 if (!isNaN(currentVal)) {
                     jQuery('input[name="quantity"]').val(currentVal + 1);
                 } else {
                     jQuery('input[name="quantity"]').val(1);
                 }
-            }else {
+            } else {
                 console.log('error: Not see elemnt ' + jQuery('input[name="quantity"]').val());
             }
         }
-        var minusQuantity = function() {
-            if (jQuery('input[name="quantity"]').val() != undefined ) {
+        var minusQuantity = function () {
+            if (jQuery('input[name="quantity"]').val() != undefined) {
                 var currentVal = parseInt(jQuery('input[name="quantity"]').val());
                 if (!isNaN(currentVal) && currentVal > 1) {
                     jQuery('input[name="quantity"]').val(currentVal - 1);
                 }
-            }else {
+            } else {
                 console.log('error: Not see elemnt ' + jQuery('input[name="quantity"]').val());
             }
         }
+
+        var buy_now = function(id) {
+            var params = {
+                type: 'POST',
+                url: `/add-to-cart/${id}`,
+                data: 'quantity=' + 1 + '&id=' + id,
+                dataType: 'json',
+                success: function (line_item) {
+                    updateCartModal();
+                    window.location = '/checkout';
+                },
+                error: function (XMLHttpRequest, textStatus) {
+                    Haravan.onError(XMLHttpRequest, textStatus);
+                }
+            }
+
+            jQuery.ajax(params);
+        }
+
     </script>
 @endpush

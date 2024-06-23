@@ -35,7 +35,7 @@
                             <h4>Thời gian đặt
                                 hàng: {{ date('d-m-Y H:i:m', strtotime(data_get($order, 'created_at'))) }}</h4>
                             <h4>Địa
-                                chỉ: {{ data_get($order, 'address') . ', ' . data_get($order, 'ward.prefix', '') . ' ' . data_get($order, 'ward.name') . ', ' . data_get($order, 'district.prefix', '') . ' ' . data_get($order, 'district.name') . ', ' . data_get($order, 'province.name') }}
+                                chỉ: {{ data_get($order, 'address') }}
                             </h4>
                             <h4>Mã đơn hàng: <b>{{ data_get($order, 'code') }}</b></h4>
                             <br/>
@@ -102,7 +102,7 @@
                                     <tr>
                                         <td colspan="6" class="text-right"
                                             style="border: none; color: red; font-size: 1.3em;">Thành
-                                            tiền: {{ number_format(data_get($order, 'price')) }}₫
+                                            tiền: {{ number_format(data_get($order, 'amount')) }}₫
                                         </td>
                                     </tr>
                                     <tr class="print-order">

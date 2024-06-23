@@ -60,7 +60,7 @@
                                         <label>Mật khẩu <span class="maudo">(*)</span></label>
                                         <input type="password" class="form-control" name="password"
                                                value="{{ old('password',isset($account) ? data_get($account, 'password', '') : '') }}"
-                                               readonly>
+                                               >
                                         @error('password')
                                         <div class="error"><p>{{$message}}</p></div>
                                         @enderror

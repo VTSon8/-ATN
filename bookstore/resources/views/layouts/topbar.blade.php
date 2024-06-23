@@ -14,7 +14,7 @@
                     <i class="fal fa-envelope"></i>
                 </div>
                 <div class="info">
-                    <a href="mailto:hotro@book.com">hotro@book.com</a>
+                    <a href="{{route('contact')}}">hotro@book.com</a>
                 </div>
             </div>
             <div class="item d-flex align-items-center">

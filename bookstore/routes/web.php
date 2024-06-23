@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\GoogleMapController;
 use App\Http\Controllers\CheckOutController;
+use App\Http\Controllers\DiscountController;
 use App\Http\Controllers\Auth\ChangePassword;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AccountController;
@@ -15,7 +17,7 @@ use \App\Http\Controllers\Admin\CategoryController;
 use \App\Http\Controllers\Admin\SupplierController;
 use \App\Http\Controllers\Admin\ProductController;
 use \App\Http\Controllers\Admin\OrderController;
-use \App\Http\Controllers\Admin\DiscountController;
+use \App\Http\Controllers\Admin\DiscountController as AdminDiscountController;
 use \App\Http\Controllers\Admin\ContactController;
 use \App\Http\Controllers\Admin\PostController;
 
@@ -43,17 +45,16 @@ Route::group(['prefix' => 'change-password'], function () {
 // Frontend
 Route::group(['middleware' => 'checkLogin'], function () {
     Route::get('/profile', [ProfileController::class, 'profile'])->name('profile');
-    Route::get('/reviews/{id}', [ProfileController::class, 'reviews'])->name('profile.reviews');
-    Route::post('/reviews/{id}', [ProfileController::class, 'reviewsStore'])->name('profile.reviews');
-    Route::post('/update-profile', [ProfileController::class, 'updateProfile'])->name('update_profile');
-    Route::get('/order-detail/{id}', [ProfileController::class, 'detail'])->name('order.detail');
     Route::put('/cancel-order/{id}', [ProfileController::class, 'cancel'])->name('order.cancel');
 });
 
+Route::get('bill', [HomeController::class, 'bill'])->name('bill');
+Route::post('google-map', [GoogleMapController::class, 'shippingCost'])->name('google_map');
+Route::post('open_street_map', [GoogleMapController::class, 'shippingCost'])->name('open_street_map');
 Route::get('/search/{search?}', [HomeController::class, 'search'])->name('search');
 Route::get('/posts', [HomeController::class, 'posts'])->name('posts');
 Route::get('/posts/{slug}', [HomeController::class, 'postDetail'])->name('posts_detail');
-Route::get('/introduce', [HomeController::class, 'introduce'])->name('introduce');
+Route::get('/about-us', [HomeController::class, 'aboutUs'])->name('about_us');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::post('/contact', [HomeController::class, 'sendTheContact'])->name('send_the_contact');
 Route::get('/account-information', [HomeController::class, 'accountInformation'])->name('account_information');
@@ -63,17 +64,18 @@ Route::get('/cart', [CartController::class, 'show'])->name('cart_detail');
 Route::post('/change-quantity', [CartController::class, 'update'])->name('change_quantity');
 Route::post('/remove-product', [CartController::class, 'remove'])->name('remove_product');
 Route::get('/remove-product/{sku?}', [CartController::class, 'removeBookByCart'])->name('remove_product_t');
-Route::post('/apply_coupon', [CartController::class, 'applyCoupon'])->name('apply_coupon');
-Route::post('/remove_coupon', [CartController::class, 'removeCoupon'])->name('remove_coupon');
+Route::post('/apply_coupon', [DiscountController::class, 'applyDiscount'])->name('apply_coupon');
+Route::post('/remove_coupon', [DiscountController::class, 'destroyDiscount'])->name('remove_coupon');
+Route::post('/remove_fee', [GoogleMapController::class, 'destroyFee'])->name('remove_fee');
 Route::get('/collections/{category?}', [HomeController::class, 'productsOfList'])->name('product_of_list');
-Route::post('/products/', [HomeController::class, 'show'])->name('show');
+Route::get('/filter', [HomeController::class, 'searchBooksByCategory'])->name('search_books_category');
 Route::get('products/{slug}', [HomeController::class, 'productDetails'])->name('product.details');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/details', [HomeController::class, 'details'])->name('details');
 
 Route::group(['prefix' => 'checkout', 'as' => 'checkout.', 'middleware' => 'empty-cart'], function () {
-    Route::get('/{id?}', [CheckOutController::class, 'index'])->name('index');
+    Route::get('/', [CheckOutController::class, 'index'])->name('index');
     Route::post('/', [CheckOutController::class, 'order'])->name('order');
     Route::get('/vnPayCheck', [CheckOutController::class, 'vnPayCheck']);
     Route::get('/json/provinces', [CheckoutController::class, 'getProvinces'])->name('provinces');
@@ -183,13 +185,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
             });
 
             Route::group(['prefix' => 'discount', 'as' => 'discount.'], function () {
-                Route::get('/', [DiscountController::class, 'index'])->name('index');
-                Route::get('/create', [DiscountController::class, 'create'])->name('create');
+                Route::get('/', [AdminDiscountController::class, 'index'])->name('index');
+                Route::get('/create', [AdminDiscountController::class, 'create'])->name('create');
                 Route::group(['middleware' => 'role:admin|super-admin'], function () {
-                    Route::post('/store', [DiscountController::class, 'store'])->name('store');
-                    Route::get('/show/{id}', [DiscountController::class, 'show'])->name('show');
-                    Route::put('/update/{id}', [DiscountController::class, 'update'])->name('update');
-                    Route::post('/delete/{id}', [DiscountController::class, 'delete'])->name('delete');
+                    Route::post('/store', [AdminDiscountController::class, 'store'])->name('store');
+                    Route::get('/show/{id}', [AdminDiscountController::class, 'show'])->name('show');
+                    Route::put('/update/{id}', [AdminDiscountController::class, 'update'])->name('update');
+                    Route::post('/delete/{id}', [AdminDiscountController::class, 'delete'])->name('delete');
                 });
             });
 
@@ -211,11 +213,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
                         [AccountController::class, 'foreverDelete'])->name('forever_delete');
                 });
             });
-
-            Route::get('/logs-viewer', [
-                \Rap2hpoutre\LaravelLogViewer\LogViewerController::class,
-                'index'
-            ])->name('logs_viewer')->middleware('role:super-admin');
 
             Route::group(['prefix' => 'posts', 'as' => 'posts.'], function () {
                 Route::get('/', [PostController::class, 'index'])->name('index');
